@@ -70,18 +70,8 @@ class Document(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    search_vector = Column(
-        TSVECTOR(),
-        Computed(
-            "setweight(to_tsvector('english', coalesce(file_name, '')), 'A') || "
-            "setweight(to_tsvector('english', coalesce(subject, '')), 'B') || "
-            "setweight(to_tsvector('english', coalesce(category, '')), 'C') || "
-            "setweight(to_tsvector('english', coalesce(array_to_string(keywords, ' '), '')), 'D')",
-            persisted=True,
-        ),
-        nullable=True,
-    )
-
+    # Full-text search vector (updated by database trigger)
+    search_vector = Column(TSVECTOR(), nullable=True)
     uploader: Mapped[Optional[User]] = relationship(back_populates="documents")
 
     __table_args__ = (
