@@ -32,4 +32,4 @@ def setup_logging(level: str = "INFO") -> None:
     )
 
 
-logger = structlog.get_logger("examhub")
+logger = structlog.get_logger("prepcore")
