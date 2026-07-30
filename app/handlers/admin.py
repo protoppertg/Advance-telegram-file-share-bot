@@ -112,7 +112,7 @@ async def cb_admin_stats(callback: CallbackQuery):
     async with get_session() as session:
         stats = await user_service.get_stats(session)
     text = (
-        "📊 <b>ExamHub Statistics</b>\n\n"
+        "📊 <b>PrepCore Statistics</b>\n\n"
         f"📄 Total Documents: <b>{stats['total_documents']}</b>\n"
         f"👥 Total Users: <b>{stats['total_users']}</b>\n"
         f"⭐ Premium Users: <b>{stats['premium_users']}</b>\n"
