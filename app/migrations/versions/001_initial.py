@@ -57,14 +57,25 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
     )
 
+       # Add search_vector column and trigger (PostgreSQL requires triggers for tsvector)
+    op.execute("ALTER TABLE documents ADD COLUMN search_vector tsvector")
+    
     op.execute("""
-        ALTER TABLE documents ADD COLUMN search_vector tsvector
-        GENERATED ALWAYS AS (
-            setweight(to_tsvector('english', coalesce(file_name, '')), 'A') ||
-            setweight(to_tsvector('english', coalesce(subject, '')), 'B') ||
-            setweight(to_tsvector('english', coalesce(category, '')), 'C') ||
-            setweight(to_tsvector('english', coalesce(array_to_string(keywords, ' '), '')), 'D')
-        ) STORED
+        CREATE OR REPLACE FUNCTION documents_search_vector_update() RETURNS trigger AS $$         BEGIN
+            NEW.search_vector :=
+                setweight(to_tsvector('english', coalesce(NEW.file_name, '')), 'A') ||
+                setweight(to_tsvector('english', coalesce(NEW.subject, '')), 'B') ||
+                setweight(to_tsvector('english', coalesce(NEW.category, '')), 'C') ||
+                setweight(to_tsvector('english', coalesce(array_to_string(NEW.keywords, ' '), '')), 'D');
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    """)
+    
+    op.execute("""
+        CREATE TRIGGER documents_search_vector_trigger
+        BEFORE INSERT OR UPDATE ON documents
+        FOR EACH ROW EXECUTE FUNCTION documents_search_vector_update();
     """)
 
     op.create_index("idx_documents_search_vector", "documents", ["search_vector"], postgresql_using="gin")
@@ -110,6 +121,8 @@ def downgrade() -> None:
     op.drop_index("idx_documents_keywords", table_name="documents")
     op.drop_index("idx_documents_file_name_trgm", table_name="documents")
     op.drop_index("idx_documents_search_vector", table_name="documents")
+    op.execute("DROP TRIGGER IF EXISTS documents_search_vector_trigger ON documents")
+    op.execute("DROP FUNCTION IF EXISTS documents_search_vector_update()")
     op.drop_table("documents")
     op.drop_table("users")
     op.execute("DROP EXTENSION IF EXISTS pg_trgm")
