@@ -39,7 +39,7 @@ class UploadStates(StatesGroup):
 @router.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
-    await message.answer("👋 <b>Welcome to ExamHub!</b>\n\nSend /search <query> or just type what you're looking for!\n\nYou can also send a PDF to support the library.")
+    await message.answer("👋 <b>Welcome to PrepCore!</b>\n\nSend /search <query> or just type what you're looking for!\n\nYou can also send a PDF to support the library.")
 
 
 @router.message(Command("help"))
