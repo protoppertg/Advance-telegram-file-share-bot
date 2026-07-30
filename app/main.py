@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
     logger.info("app_stopped")
 
 
-app = FastAPI(title="ExamHub Bot", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="PrepCore Bot", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     SessionMiddleware,
