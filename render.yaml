@@ -22,11 +22,6 @@ services:
         fromDatabase:
           name: examhub-db
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: examhub-redis
-          property: connectionString
       - key: ADMIN_IDS
         sync: false
       - key: CHANNEL_ID
@@ -43,10 +38,5 @@ services:
 databases:
   - name: examhub-db
     databaseName: examhub
-    plan: free
-    ipAllowList: []
-
-  - type: redis
-    name: examhub-redis
     plan: free
     ipAllowList: []
